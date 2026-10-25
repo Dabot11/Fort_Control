@@ -2,6 +2,14 @@
 
 Motor de referencia cloud: **Godot 4.6.3.stable.official.7d41c59c4**. Los comandos se ejecutan desde la raíz del proyecto. La prueba física reportada utiliza otra versión del editor y se registra por separado.
 
+## Giro táctil de la cámara — 25 de octubre de 2026
+
+`bash scripts/run_tests.sh` terminó con código 0, sin errores ni advertencias: **343 comprobaciones**, repartidas en 143 de lógica, 68 de entrada, 70 de presentación y 62 de modelos. No cambiaron el combate ni el balance; las tres partidas automatizadas de la integración de modelos siguen registradas en el apartado siguiente y no se repitieron para este cambio de cámara.
+
+Las pruebas de entrada usan `Input.parse_input_event` para deslizar ambos dedos juntos, enviar sus movimientos en frames separados, pellizcar con un dedo quieto, combinar pellizco y giro en ambos sentidos y girar desde el límite de zoom. Comprueban el foco y zoom finales, soltar un solo dedo sin seleccionar, raycast y desplazamiento tras girar, restauración al reiniciar, cancelación al pausar y protección de la UI. También ejercitan el botón derecho y su liberación sobre el HUD.
+
+Se ejecutó una ventana real **Mobile/Vulkan a 720 × 1280** en Xvfb/Mesa por software. Se enviaron tres arrastres táctiles sintéticos consecutivos, se comprobaron zoom y foco, y se revisaron capturas desde las nuevas orientaciones, pausa y reinicio. El proceso terminó con código 0 y sin errores ni advertencias. Esto comprueba el renderizado y despacho de eventos en Linux; la comodidad y sensibilidad con dedos reales necesitan una prueba física en iPhone.
+
 ## Integración de modelos 3D — 25 de octubre de 2026
 
 La revisión actual incorpora los GLB de ballesta, esqueleto animado, espada y flecha proporcionados por el usuario. La torre se simplificó a 16.312 triángulos y se separó en base y arma móvil. Las texturas se redujeron para su escala en pantalla. Los datos de geometría, skin y animación de los otros tres modelos se conservaron; se verificaron byte a byte sus buffers ajenos a imágenes.
@@ -156,6 +164,9 @@ Las comprobaciones detalladas de la nueva iteración permanecen pendientes hasta
 
 - [ ] Un toque selecciona; un arrastre mueve la cámara sin seleccionar.
 - [ ] Pellizcar acerca y aleja; levantar uno o ambos dedos no selecciona casillas accidentalmente.
+- [ ] Deslizar ambos dedos juntos hacia los lados gira la vista, conservando el zoom y sin seleccionar casillas al soltarlos.
+- [ ] Después de girar, comprobar selección, construcción y desplazamiento con un dedo desde la nueva orientación.
+- [ ] Combinar giro y pellizco, pausar y reanudar; reiniciar debe recuperar la vista inicial.
 - [ ] Tocar o arrastrar desde un botón no mueve la cámara.
 - [ ] Un gesto que termina sobre la interfaz no deja la cámara arrastrando indefinidamente.
 - [ ] Los botones siguen siendo alcanzables con recortes y barra inferior del sistema.

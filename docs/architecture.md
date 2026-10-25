@@ -13,7 +13,7 @@ La escena `scenes/main/main.tscn` es el punto de entrada. Su coordinador, `FortG
 | `FortEnemy` | Vida, desplazamiento por waypoints y transición a muerte o llegada |
 | `FortTower` | Nivel, selección de objetivo, orientación y cadencia |
 | `FortProjectile` | Seguimiento visual e impacto único |
-| `FortCamera` | Pan, zoom, límites y selección mediante raycast |
+| `FortCamera` | Desplazamiento, giro horizontal, zoom, límites y selección mediante raycast |
 | `FortHUD` | Valores mostrados, panel contextual y menús |
 | `FortFeedback` | Respuesta audiovisual a eventos ya resueltos, límites de efectos y estado de sonido |
 | `FortSoundBank` | Generación y caché de sonidos PCM propios, sin servicios ni recursos de terceros |

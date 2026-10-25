@@ -163,7 +163,7 @@ func _build_ui() -> void:
 	_wave_button.custom_minimum_size.y = 94
 	_wave_button.pressed.connect(func() -> void: start_wave_requested.emit())
 	bottom.add_child(_wave_button)
-	var help := _label("Arrastra para explorar  ·  Pellizca o usa la rueda para zoom", 16, MUTED)
+	var help := _label("1 dedo: mover · 2 dedos: girar · Pellizco: zoom", 16, MUTED)
 	help.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	help.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	help.add_theme_color_override("font_shadow_color", INK)

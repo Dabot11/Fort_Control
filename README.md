@@ -73,6 +73,7 @@ Si Git indica un conflicto con cambios locales, revisa los archivos afectados co
 | --- | --- | --- |
 | Seleccionar casilla o torre | Clic corto | Toque corto |
 | Mover cámara | Arrastrar con botón izquierdo | Arrastrar con un dedo |
+| Girar la vista | Arrastrar horizontalmente con botón derecho | Deslizar dos dedos juntos hacia los lados |
 | Acercar o alejar | Rueda del mouse | Pellizcar con dos dedos |
 | Construir o mejorar | Botón del panel contextual | Botón del panel contextual |
 | Iniciar siguiente oleada | Botón, Espacio o Enter | Botón inferior |
@@ -81,6 +82,8 @@ Si Git indica un conflicto con cambios locales, revisa los archivos afectados co
 | Reiniciar | Botón del menú | Botón del menú |
 
 Arrastrar la cámara no construye una torre: la construcción siempre requiere confirmar en el panel. La siguiente oleada se habilita cuando termina la anterior. Puedes construir y mejorar durante una oleada si tienes oro. Las casillas del camino no permiten construir.
+
+El giro permite rodear el tablero 360° y mantiene la inclinación de la vista. Desliza ambos dedos juntos hacia la izquierda o derecha para girar; separarlos o juntarlos cambia el zoom. Soltar un dedo después de girar no selecciona una casilla. Al reiniciar la partida, la cámara vuelve a su orientación, posición y zoom iniciales.
 
 Al seleccionar una casilla vacía, el anillo **cian** muestra el alcance de una ballesta de nivel 1. En una torre construida, cian es el alcance actual y el anillo **dorado discontinuo** anticipa el siguiente nivel. El panel compara daño, alcance y ataques por segundo antes de gastar; nivel 3 es el máximo.
 

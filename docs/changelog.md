@@ -1,5 +1,13 @@
 # Cambios de Fort Control
 
+## Giro de cámara con dos dedos
+
+Deslizar dos dedos juntos hacia los lados gira la vista alrededor del tablero, manteniendo su inclinación. Un dedo desplaza la cámara y el pellizco sigue controlando el zoom. En escritorio, el giro también está disponible al arrastrar con el botón derecho del mouse.
+
+El reconocimiento agrupa los movimientos de ambos dedos y conserva una referencia de zoom estable para que los eventos intercalados no dejen cambios de zoom o desplazamientos accidentales. La pausa cancela los gestos pendientes y reiniciar recupera la orientación inicial. El HUD y la guía de controles muestran el nuevo gesto.
+
+Pasaron 343 comprobaciones automatizadas, incluidas 68 de entrada mediante eventos de Godot. Se revisó el giro en una ventana Mobile/Vulkan de 720 × 1280 en Linux. La sensación del gesto con dos dedos reales queda pendiente de probar en el iPhone.
+
 ## Integración de modelos 3D
 
 Esta revisión incorpora los modelos facilitados para Fort Control: ballesta, esqueleto animado, espada y flecha. Los recursos GLB y sus texturas se incluyen en el proyecto para jugar offline.
