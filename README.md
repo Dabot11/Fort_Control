@@ -9,6 +9,7 @@ Las pruebas automatizadas usan **Godot 4.6.3**. El MVP ya cuenta con una partida
 - Un tablero de 8 × 14 casillas, camino fijo, castillo de piedra con techos azules y ocho posiciones de construcción.
 - Ballestas que priorizan al enemigo más avanzado dentro de su alcance, con proyectiles visibles y tres niveles de mejora.
 - Esqueletos con vida, movimiento por puntos del camino, recompensa por eliminación y daño al llegar al castillo.
+- Modelos 3D texturizados de ballesta, esqueleto, espada y flecha, con animación de caminar y arma orientable.
 - 300 monedas y 20 puntos de vida iniciales; cinco oleadas de dificultad creciente.
 - Cámara isométrica ortográfica, selección, arrastre y zoom con mouse o pantalla táctil.
 - Interfaz en español, pausa, victoria, derrota y reinicio.
@@ -16,11 +17,11 @@ Las pruebas automatizadas usan **Godot 4.6.3**. El MVP ya cuenta con una partida
 - Indicadores de alcance y comparación de estadísticas antes de mejorar una ballesta.
 - Recursos de balance editables y pruebas automatizadas sin ventana.
 
-Todos los modelos provisionales se crean con geometría nativa de Godot. No necesitas Blender, Meshy, plugins ni descargar paquetes de arte para jugar.
+Los modelos de combate están incluidos como archivos GLB en `assets/models/`. El tablero, el castillo y la decoración se crean con geometría nativa de Godot. No necesitas Blender, una cuenta de Meshy, plugins ni descargar paquetes de arte para jugar.
 
 <img src="docs/images/fort-control.png" alt="Fort Control: ballestas defendiendo el camino al castillo y panel de mejoras" width="360">
 
-Captura de esta iteración con el renderizador Mobile en Linux: comparación de mejoras, alcance actual y próximo, y oro obtenido. La nueva versión todavía requiere repetición en el iPhone.
+Captura con el renderizador Mobile en Linux. [Ver los modelos con la cámara acercada](docs/images/fort-control-models.png). La integración de los modelos todavía requiere una nueva partida en el iPhone para comprobar apariencia y rendimiento en el dispositivo.
 
 ## Jugar en una Mac con Apple Silicon
 
@@ -64,7 +65,7 @@ git status --short
 git pull --ff-only origin main
 ```
 
-Si Git indica un conflicto con cambios locales, revisa los archivos afectados conservando tus ajustes. Después abre el proyecto con la misma versión de Godot que utilizaste para exportar, reimporta y genera de nuevo el proyecto Xcode. La exportación anterior no incorpora automáticamente los cambios del repositorio.
+Si Git indica un conflicto con cambios locales, revisa los archivos afectados conservando tus ajustes. Después abre el proyecto con la misma versión de Godot que utilizaste para exportar y espera la importación de los nuevos GLB y sus texturas. Prueba con **F5**, vuelve a exportar para iOS y abre el proyecto Xcode recién generado. La exportación anterior no incorpora automáticamente los cambios del repositorio.
 
 ## Controles y reglas
 
@@ -99,18 +100,22 @@ Los parámetros están en archivos JSON de texto. Puedes editarlos desde Godot o
 
 La referencia completa de campos y valores iniciales está en [`docs/balance.md`](docs/balance.md). No necesitas cambiar scripts para ajustar esos valores.
 
-## Sustituir el esqueleto por un GLB de Meshy
+## Modelos 3D y animaciones
 
-La lógica de movimiento y combate vive en `scripts/combat/enemy.gd`; la representación provisional está separada en `scripts/combat/enemy_visual.gd`.
+Los modelos aportados para Fort Control ya forman parte del proyecto. Godot los importa al abrirlo; las texturas están incluidas en los GLB y el juego funciona offline.
 
-1. Exporta el modelo como `.glb`, comprueba su licencia y coloca el archivo en `assets/characters/`. No incluyas claves de Meshy ni archivos privados de tu cuenta.
-2. Deja que Godot lo importe. Abre el modelo para revisar escala, materiales y animaciones. Ajusta la escala de su nodo visual, sin cambiar las coordenadas del enemigo ni las casillas del mapa.
-3. Crea una escena visual propia que instancie el GLB. El enemigo mira hacia el eje local `-Z` y sus pies deben quedar cerca del origen.
-4. Adapta el nodo `Visual` creado por `enemy.gd`, conservando los métodos `animate_walk(delta, speed)`, `set_health_ratio(ratio)` y `show_hit()` que usa la lógica. Puedes implementarlos en un script envoltorio para el modelo importado, sin modificar los archivos generados por el importador.
-5. Si el GLB tiene `AnimationPlayer`, asigna sus clips a **Idle**, **Walk**, **Attack** y **Death**. Verifica los nombres reales: no todos los modelos exportan esas pistas ni usan los mismos nombres.
-6. Repite las pruebas y juega una oleada para confirmar orientación, escala, animación y legibilidad desde la cámara.
+| Modelo | Recurso incluido | Uso |
+| --- | --- | --- |
+| Ballesta | `assets/models/tower/crossbow.glb` | Base fija y arma que apunta a los enemigos |
+| Esqueleto | `assets/models/skeleton/warrior.glb` | Personaje animado que recorre el camino |
+| Espada | `assets/models/sword/shardblade.glb` | Arma visual del esqueleto |
+| Flecha | `assets/models/arrow/crystal_arrow.glb` | Proyectil de la ballesta |
 
-En este MVP el esqueleto camina y se retira al morir o llegar al castillo; al morir deja un efecto breve de fragmentos y recompensa. **Attack** no se utiliza porque no hay combate cuerpo a cuerpo. Para reproducir **Death** completo, conserva inmediatamente el estado lógico de enemigo muerto y reproduce una copia visual sin colisiones antes de retirarla; la animación nunca debe volver a entregar oro ni retrasar el estado lógico de la oleada.
+La torre original se simplifica antes de incorporarla al juego. Los detalles de preparación, tamaños y procedencia están en [`assets/models/README.md`](assets/models/README.md). El mapa, el castillo y la vegetación conservan su geometría actual.
+
+Los scripts `enemy_visual.gd` y `tower_visual.gd` adaptan los modelos a las reglas existentes. El esqueleto camina con su espada y conserva su barra de vida; la ballesta gira sobre una base fija y muestra sus tres niveles. El combate sigue usando el mismo recorrido, daño, alcance, cadencia y recompensas.
+
+Para sustituir un modelo más adelante, cambia su capa visual y conserva los métodos documentados en [`docs/architecture.md`](docs/architecture.md). Comprueba escala, orientación, pivotes, animación y selección desde la cámara del juego. Evita editar `.godot/`: es una caché que Godot vuelve a generar.
 
 ## Ejecutar las pruebas
 
@@ -173,10 +178,11 @@ No necesitas permisos de internet para el juego. No guardes contraseñas de firm
 | `scripts/core/` | Coordinación de la partida y estado general |
 | `scripts/systems/` | Economía, vida y oleadas |
 | `scripts/world/` | Tablero, casillas y escenario |
-| `scripts/combat/` | Enemigos, torres, proyectiles y modelos provisionales |
+| `scripts/combat/` | Enemigos, torres, proyectiles y adaptación de sus modelos |
 | `scripts/camera/` | Cámara ortográfica y gestos |
 | `scripts/ui/` | HUD, selección y menús |
 | `scripts/feedback/` | Respuesta visual y sonora a eventos de juego |
+| `assets/models/` | Modelos GLB, texturas integradas y documentación de preparación |
 | `resources/` | Configuración del mapa y balance |
 | `tests/` | Verificaciones automatizadas |
 | `docs/` | Balance, arquitectura, exportación y validación |
@@ -186,9 +192,9 @@ Consulta [`docs/architecture.md`](docs/architecture.md) para entender cómo se c
 ## Limitaciones y próximos pasos
 
 - Un mapa, un tipo de torre y un tipo de enemigo. No hay guardado de partidas, backend, anuncios ni compras.
-- El arte es provisional y se genera con nodos nativos; los efectos y animaciones son sencillos.
+- Los modelos de combate están integrados; el escenario mantiene su geometría procedural. El esqueleto camina y desaparece al morir o llegar al castillo; no se añade combate cuerpo a cuerpo.
 - El balance incorpora la observación de que las primeras cuatro oleadas eran fáciles y la quinta concentraba el salto de dificultad. Necesita otra partida humana para comprobar el nuevo ritmo.
 - La orientación móvil es vertical. La interfaz se adapta a otras proporciones de ventana, pero su experiencia principal es portrait.
 - El MVP base ya tiene una partida completa reportada en iPhone 16 Pro. La nueva iteración, otros iPhone, iPad y Android necesitan validación; todavía no hay mediciones de consumo o rendimiento en teléfonos.
 
-El siguiente paso es **repetir las cinco oleadas en el mismo iPhone 16 Pro**, comprobar audio, efectos, comparación de mejoras y el ritmo de las oleadas 2–5. Después conviene probar un Android de gama media y medir tiempos de fotograma antes de sustituir los modelos provisionales. Los cambios de esta iteración están resumidos en [`docs/changelog.md`](docs/changelog.md).
+El siguiente paso es **repetir las cinco oleadas en el mismo iPhone 16 Pro** con los nuevos modelos: comprobar animaciones, orientación de disparo, legibilidad, controles y tiempos de fotograma cuando coincidan varios enemigos y proyectiles. Después conviene probar un Android de gama media. Los cambios de esta iteración están resumidos en [`docs/changelog.md`](docs/changelog.md).

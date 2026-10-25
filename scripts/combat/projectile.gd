@@ -2,6 +2,8 @@ class_name FortProjectile
 extends Node3D
 ## A homing visual bolt. Impact consumes it before forwarding any damage.
 
+const ArrowScene := preload("res://assets/models/arrow/crystal_arrow.glb")
+
 var _target: FortEnemy
 var _damage: float = 0.0
 var _speed: float = 0.0
@@ -16,24 +18,14 @@ func configure(target: FortEnemy, damage: float, speed: float) -> void:
 
 
 func _ready() -> void:
-	var mesh_instance := MeshInstance3D.new()
-	var shaft := BoxMesh.new()
-	shaft.size = Vector3(0.055, 0.055, 0.45)
-	mesh_instance.mesh = shaft
-	var material := StandardMaterial3D.new()
-	material.albedo_color = Color("ffe193")
-	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	mesh_instance.material_override = material
-	mesh_instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	add_child(mesh_instance)
-	var tip := MeshInstance3D.new()
-	var tip_mesh := PrismMesh.new()
-	tip_mesh.size = Vector3(0.16, 0.08, 0.18)
-	tip.mesh = tip_mesh
-	tip.position.z = -0.25
-	tip.material_override = material
-	tip.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	add_child(tip)
+	var visual := ArrowScene.instantiate() as Node3D
+	visual.name = "CrystalArrow"
+	# Source points along +Y and is 0.952148 units long; combat points along -Z.
+	visual.rotation.x = -PI * 0.5
+	visual.scale = Vector3.ONE * (0.62 / 0.952148)
+	add_child(visual)
+	for child: Node in visual.find_children("*", "MeshInstance3D", true, false):
+		(child as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 
 
 func _physics_process(delta: float) -> void:

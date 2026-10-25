@@ -1,5 +1,19 @@
 # Cambios de Fort Control
 
+## Integración de modelos 3D
+
+Esta revisión incorpora los modelos facilitados para Fort Control: ballesta, esqueleto animado, espada y flecha. Los recursos GLB y sus texturas se incluyen en el proyecto para jugar offline.
+
+- Preparación de la torre original para reducir su complejidad y permitir que la ballesta apunte sobre una base fija.
+- Esqueleto con animación de caminar y espada que acompaña el movimiento de su mano.
+- Flecha texturizada en los disparos.
+- Adaptación de escala, orientación, boca de disparo, reacción de impacto y representación de los tres niveles de torre.
+- Documentación de procedencia y preparación en `assets/models/README.md`.
+
+La integración mantiene el mapa, las reglas de combate, el balance de las oleadas y los ajustes de exportación existentes. El castillo, el terreno y la decoración conservan su geometría procedural.
+
+La importación termina sin errores ni advertencias, y pasan 311 comprobaciones automatizadas y tres simulaciones con combate real. Los resultados de revisión visual y empaquetado se registran en `validation.md`. La nueva apariencia y su rendimiento todavía requieren una partida en el iPhone; la prueba física de una versión anterior no acredita estos modelos.
+
 ## Iteración de respuesta audiovisual y balance
 
 Esta revisión parte del MVP `82365e0` y del reporte de una partida completa en iPhone 16 Pro. El usuario consideró cómodos los controles y fáciles las primeras cuatro oleadas, con mayor dificultad concentrada en la quinta. No se registraron métricas de rendimiento ni un saldo final exacto de vida.

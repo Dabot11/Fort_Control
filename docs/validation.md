@@ -2,6 +2,30 @@
 
 Motor de referencia cloud: **Godot 4.6.3.stable.official.7d41c59c4**. Los comandos se ejecutan desde la raíz del proyecto. La prueba física reportada utiliza otra versión del editor y se registra por separado.
 
+## Integración de modelos 3D — 25 de octubre de 2026
+
+La revisión actual incorpora los GLB de ballesta, esqueleto animado, espada y flecha proporcionados por el usuario. La torre se simplificó a 16.312 triángulos y se separó en base y arma móvil. Las texturas se redujeron para su escala en pantalla. Los datos de geometría, skin y animación de los otros tres modelos se conservaron; se verificaron byte a byte sus buffers ajenos a imágenes.
+
+`bash scripts/run_tests.sh --gameplay` terminó con código 0, sin errores ni advertencias:
+
+| Comprobación | Resultado de esta revisión |
+| --- | --- |
+| Lógica principal | 143 verificaciones, 0 fallos |
+| Entrada e interfaz | 36 verificaciones, 0 fallos |
+| Sonido, efectos, alcance y mejoras | 70 verificaciones, 0 fallos |
+| Modelos importados | 62 verificaciones, 0 fallos |
+| `first_one` | Primera oleada: 20 vidas, 350 monedas, una torre |
+| `strategy` | Victoria: 19 vidas, 625 monedas, cinco torres |
+| `strategy_perfect` | Victoria sin fugas: 20 vidas, 550 monedas, cuatro torres |
+
+Son **311 verificaciones automatizadas y tres simulaciones con combate real**. La suite de modelos comprueba mallas y materiales texturizados compartidos, límites de geometría y texturas, movimiento de huesos, espada unida a una mano válida, ausencia de desplazamiento acumulado por animación, pausa y continuación. También comprueba que la ballesta apunta en cuatro direcciones sin girar la base, conserva la orientación al mejorar y recupera su pose tras el retroceso, además de la escala de la flecha.
+
+La exportación `Validation PCK` terminó con código 0. El paquete arrancó fuera del checkout y pasó las mismas 62 comprobaciones de modelos usando un script de prueba externo: los presets excluyen deliberadamente `tests/`. Esto valida los recursos importados y las texturas dentro del paquete, no una aplicación iOS firmada.
+
+Se revisaron capturas reales del juego en **Mobile/Vulkan a 720 × 1280** y **Compatibility/OpenGL a 390 × 844**, además de una galería de los tres niveles de torre y distintas orientaciones del esqueleto. Ambos procesos terminaron con código 0. Compatibility emitió únicamente un aviso sobre el cambio de V-Sync no soportado por el controlador virtual de Xvfb. Se revisaron combate, acercamiento de cámara y menú de pausa; las capturas usan renderizado por software en Linux.
+
+La [captura con cámara acercada](images/fort-control-models.png) muestra los modelos dentro del juego. Las [métricas y recetas de preparación](../assets/models/README.md) describen los archivos incorporados. **La apariencia, temperatura y rendimiento de estos modelos en iPhone siguen pendientes de una nueva prueba física.** No se cambiaron los datos de balance ni los ajustes locales de firma/exportación.
+
 ## Prueba manual reportada del MVP base
 
 | Dato | Reporte del usuario |
@@ -16,9 +40,9 @@ Motor de referencia cloud: **Godot 4.6.3.stable.official.7d41c59c4**. Los comand
 
 Es evidencia de una partida manual **reportada por el usuario**, no una medición realizada por el agente. No se registraron FPS, tiempos de CPU/GPU, consumo, temperatura ni una matriz de dispositivos. El reporte motivó la revisión de la progresión de las oleadas 2–5.
 
-## Nueva iteración: sonido, efectos y balance
+## Iteración anterior `bcbad4d`: sonido, efectos y balance
 
-La nueva iteración añade efectos de combate, sonidos, alcance visible, comparación de mejoras y balance revisado. **Debe volver a probarse en el iPhone**: el resultado del MVP base no valida automáticamente esos cambios.
+La iteración `bcbad4d` añadió efectos de combate, sonidos, alcance visible, comparación de mejoras y balance revisado. El resultado del MVP base no valida automáticamente esos cambios; los resultados siguientes se conservan como referencia histórica.
 
 Las verificaciones ejecutadas de esta revisión usan Godot 4.6.3 en Linux cloud:
 
@@ -140,6 +164,9 @@ Las comprobaciones detalladas de la nueva iteración permanecen pendientes hasta
 
 ## Repetición física de la nueva iteración
 
+- [ ] Confirmar las texturas de ballesta, esqueleto, espada y flecha, tanto a zoom inicial como al acercar la cámara.
+- [ ] Verificar que gira el arma de la torre y su base queda fija; distinguir sus tres niveles.
+- [ ] Comprobar que el esqueleto camina, lleva la espada en la mano y se congela al pausar.
 - [ ] Jugar las cinco oleadas en el mismo iPhone 16 Pro y anotar en cuáles se pierde vida, cuándo se construye y cuándo se mejora.
 - [ ] Comparar el ritmo de las oleadas 2, 3 y 4 con la quinta; reportar si sigue existiendo un salto brusco.
 - [ ] Escuchar disparos, impactos, construcción, mejoras y señales de oleada/resultado sin saturación durante combate intenso.

@@ -33,11 +33,21 @@ La escena `scenes/main/main.tscn` es el punto de entrada. Su coordinador, `FortG
 
 ## Separar presentación y lógica
 
-Los modelos provisionales de enemigos y torres están separados de sus reglas de combate. Los modelos GLB futuros deben cambiar esa capa visual, manteniendo las señales y métodos de la lógica.
+Los modelos GLB de enemigos, torres, espada y flecha viven en `assets/models/`. La lógica de combate conserva sus responsabilidades; los scripts visuales adaptan escala, orientación, animaciones y pivotes. Las texturas forman parte de los recursos locales y no hay descargas durante una partida.
+
+| Capa visual | Contrato con la lógica |
+| --- | --- |
+| `enemy_visual.gd` | `animate_walk(delta, speed)`, `set_health_ratio(ratio)` y `show_hit()` |
+| `tower_visual.gd` | `set_level(level)`, `aim_at(world_target)`, `muzzle_position()` en coordenadas globales y `play_recoil()` |
+| Presentación de `projectile.gd` | Orientar el modelo de flecha; el proyectil consume su estado antes de aplicar daño |
+
+La orientación de avance del enemigo y la de disparo son el eje local `-Z`. La animación del esqueleto no debe trasladar su nodo lógico ni cambiar el camino. La espada sigue la mano como parte de la presentación. La barra de salud conserva su propia transformación para que la reacción de impacto no la deforme.
+
+La torre mantiene la base inmóvil mientras gira el arma. El origen del proyectil se obtiene de su boca de disparo, y las mejoras conservan la dirección a la que apunta. Los tres niveles representan los mismos valores de balance que muestra el HUD.
 
 No se usan cuerpos físicos para mover esqueletos ni navegación dinámica: el camino está definido como puntos y el movimiento consume distancia sobre cada segmento. Las torres no alteran ese recorrido. Las colisiones de construcción se reservan para selección; no deben impedir el paso.
 
-Las escenas de enemigo, torre y proyectil ofrecen puntos de entrada reutilizables. La mayor parte de la geometría provisional se crea en código para que el proyecto sea autónomo y mantenga pocos recursos externos.
+Las escenas de enemigo, torre y proyectil ofrecen puntos de entrada reutilizables. El terreno, el castillo y la decoración siguen creados en código; los modelos de combate se importan con Godot. La preparación de los modelos y sus límites están documentados en `assets/models/README.md`.
 
 ## Respuesta visual y sonora
 

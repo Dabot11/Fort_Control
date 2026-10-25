@@ -44,6 +44,7 @@ run_godot --headless --path "$PROJECT_DIR" --editor --import --quit
 run_godot --headless --path "$PROJECT_DIR" --script res://tests/test_runner.gd
 run_godot --headless --path "$PROJECT_DIR" --script res://tests/test_input.gd
 run_godot --headless --path "$PROJECT_DIR" --script res://tests/test_polish.gd
+run_godot --headless --path "$PROJECT_DIR" --script res://tests/test_models.gd
 if [[ "$FORT_RUN_GAMEPLAY" == true ]]; then
   run_godot --headless --path "$PROJECT_DIR" --script res://tests/test_gameplay.gd -- first_one
   run_godot --headless --path "$PROJECT_DIR" --script res://tests/test_gameplay.gd -- strategy

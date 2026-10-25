@@ -1,21 +1,38 @@
 extends Node3D
-## Native low-poly crossbow; gameplay and targeting belong to the parent tower.
+## Imported crossbow: the pedestal stays fixed while its weapon aims and recoils.
+
+const ModelScene = preload("res://assets/models/tower/crossbow.glb")
 
 static var _materials: Dictionary = {}
 var _level := 1
 var _model: Node3D
+var _base: Node3D
 var _head: Node3D
+var _muzzle: Node3D
+var _upgrade_details: Node3D
+var _head_origin := Vector3.ZERO
 var _recoil_time := 0.0
 
 
 func _ready() -> void:
-	_rebuild()
+	_model = ModelScene.instantiate() as Node3D
+	_model.name = "CrossbowModel"
+	add_child(_model)
+	_base = _model.find_child("TowerBase", true, false) as Node3D
+	_head = _model.find_child("AimHead", true, false) as Node3D
+	_muzzle = _model.find_child("Muzzle", true, false) as Node3D
+	assert(_base != null and _head != null and _muzzle != null, "Crossbow import must preserve its base, pivot and muzzle.")
+	_head_origin = _head.position
+	_upgrade_details = Node3D.new()
+	_upgrade_details.name = "UpgradeDetails"
+	add_child(_upgrade_details)
+	_apply_level()
 
 
 func set_level(level: int) -> void:
 	_level = clampi(level, 1, 3)
-	if is_inside_tree():
-		_rebuild()
+	if is_node_ready():
+		_apply_level()
 
 
 func aim_at(world_target: Vector3) -> void:
@@ -28,8 +45,8 @@ func aim_at(world_target: Vector3) -> void:
 
 
 func muzzle_position() -> Vector3:
-	if is_instance_valid(_head):
-		return _head.to_global(Vector3(0, 0.05, -0.75))
+	if is_instance_valid(_muzzle):
+		return _muzzle.global_position
 	return global_position + Vector3.UP
 
 
@@ -42,63 +59,36 @@ func _process(delta: float) -> void:
 		return
 	_recoil_time = maxf(0.0, _recoil_time - delta)
 	var kick := sin((_recoil_time / 0.16) * PI)
-	_head.position.x = sin(_head.rotation.y) * kick * 0.12
-	_head.position.z = cos(_head.rotation.y) * kick * 0.12
-	_head.rotation.x = -kick * 0.07
+	var backwards := Basis(Vector3.UP, _head.rotation.y) * Vector3(0, 0, kick * 0.08)
+	_head.position = _head_origin + backwards
+	_head.rotation.x = -kick * 0.045
 
 
-func _rebuild() -> void:
+func _apply_level() -> void:
+	# Keep the imported meshes/materials shared and preserve the weapon's yaw.
 	_recoil_time = 0.0
-	var previous_yaw := 0.0
-	if is_instance_valid(_head):
-		previous_yaw = _head.rotation.y
-	if is_instance_valid(_model):
-		remove_child(_model)
-		_model.queue_free()
-	_model = Node3D.new()
-	_model.name = "CrossbowModel"
-	add_child(_model)
-	var stone := Color("bcc7c0")
-	var dark_stone := Color("647c85")
-	var wood := Color("8a4d2d")
-	var wood_light := Color("bc8550")
-	var accent := Color("407fc5") if _level < 3 else Color("e6bb4e")
-	var height := 0.68 + float(_level - 1) * 0.16
-	_box(_model, Vector3(0.88, 0.16, 0.88), Vector3(0, 0.08, 0), dark_stone)
-	_box(_model, Vector3(0.61, height, 0.61), Vector3(0, 0.16 + height * 0.5, 0), stone)
-	for y in [0.20, 0.16 + height * 0.5, 0.16 + height]:
-		_box(_model, Vector3(0.66, 0.055, 0.66), Vector3(0, y, 0), dark_stone)
-	_box(_model, Vector3(0.78, 0.12, 0.78), Vector3(0, 0.19 + height, 0), accent)
-	for x in [-0.30, 0.30]:
-		_box(_model, Vector3(0.09, height * 0.73, 0.07), Vector3(x, 0.18 + height * 0.5, -0.32), accent)
-	if _level >= 2:
-		for x in [-0.38, 0.38]:
-			for z in [-0.38, 0.38]:
-				_box(_model, Vector3(0.14, 0.28, 0.14), Vector3(x, 0.22 + height, z), stone)
+	_head.position = _head_origin
+	_head.rotation.x = 0.0
+	for child in _upgrade_details.get_children():
+		_upgrade_details.remove_child(child)
+		child.queue_free()
+	var lift := float(_level - 1) * 0.10
+	_model.position.y = lift
+	if _level == 1:
+		return
+	var trim := Color("407fc5") if _level == 2 else Color("dfb34f")
+	var studs := Color("e9e0bf") if _level == 2 else Color("f7d57a")
+	_box(_upgrade_details, Vector3(1.10, lift, 1.10), Vector3(0, lift * 0.5, 0), Color("718087"))
+	_box(_upgrade_details, Vector3(1.13, 0.035, 1.13), Vector3(0, lift - 0.015, 0), trim)
+	# The two silver / three gold studs make rank visible from either path side.
+	for side in [-1.0, 1.0]:
+		for rank in range(_level):
+			var x := (float(rank) - float(_level - 1) * 0.5) * 0.17
+			_box(_upgrade_details, Vector3(0.08, 0.055, 0.025), Vector3(x, lift * 0.5, side * 0.56), studs)
 	if _level == 3:
-		_box(_model, Vector3(0.23, 0.29, 0.05), Vector3(0, 0.46 + height * 0.25, -0.34), accent)
-		_box(_model, Vector3(0.045, 0.21, 0.035), Vector3(0, 0.46 + height * 0.25, -0.375), wood)
-		_box(_model, Vector3(0.15, 0.04, 0.035), Vector3(0, 0.46 + height * 0.25, -0.375), wood)
-	_head = Node3D.new()
-	_head.name = "AimHead"
-	_head.position.y = height + 0.45
-	_model.add_child(_head)
-	_head.rotation.y = previous_yaw
-	_box(_head, Vector3(0.18, 0.15, 0.86), Vector3(0, 0, -0.14), wood)
-	_box(_head, Vector3(0.24, 0.10, 0.25), Vector3(0, -0.08, 0.19), wood_light)
-	var span := 0.48 + float(_level - 1) * 0.06
-	_beam(_head, Vector3(-span, 0.02, -0.18), Vector3(-0.20, 0.02, -0.39), 0.055, wood_light)
-	_beam(_head, Vector3(-0.20, 0.02, -0.39), Vector3(0.20, 0.02, -0.39), 0.06, wood_light)
-	_beam(_head, Vector3(0.20, 0.02, -0.39), Vector3(span, 0.02, -0.18), 0.055, wood_light)
-	_beam(_head, Vector3(-span, 0.02, -0.18), Vector3(0, 0.02, 0.16), 0.012, Color("e6d8b7"))
-	_beam(_head, Vector3(span, 0.02, -0.18), Vector3(0, 0.02, 0.16), 0.012, Color("e6d8b7"))
-	_box(_head, Vector3(0.035, 0.04, 0.72), Vector3(0, 0.10, -0.23), Color("ddd5bc"))
-	_box(_head, Vector3(0.10, 0.045, 0.13), Vector3(0, 0.10, -0.62), dark_stone)
-	if _level >= 2:
-		_box(_head, Vector3(0.22, 0.19, 0.10), Vector3(0, 0.02, -0.33), accent)
-	if _level == 3:
-		for x in [-0.12, 0.12]:
-			_box(_head, Vector3(0.03, 0.04, 0.66), Vector3(x, 0.10, -0.23), Color("ddd5bc"))
+		for x in [-0.47, 0.47]:
+			for z in [-0.47, 0.47]:
+				_box(_upgrade_details, Vector3(0.13, 0.09, 0.13), Vector3(x, lift + 0.02, z), trim)
 
 
 func _box(parent: Node3D, size: Vector3, origin: Vector3, color: Color) -> MeshInstance3D:
@@ -110,20 +100,6 @@ func _box(parent: Node3D, size: Vector3, origin: Vector3, color: Color) -> MeshI
 	instance.material_override = _material(color)
 	parent.add_child(instance)
 	return instance
-
-
-func _beam(parent: Node3D, start: Vector3, end: Vector3, radius: float, color: Color) -> void:
-	var mesh := CylinderMesh.new()
-	mesh.top_radius = radius
-	mesh.bottom_radius = radius
-	mesh.height = start.distance_to(end)
-	mesh.radial_segments = 6
-	var instance := MeshInstance3D.new()
-	instance.mesh = mesh
-	instance.position = (start + end) * 0.5
-	instance.quaternion = Quaternion(Vector3.UP, (end - start).normalized())
-	instance.material_override = _material(color)
-	parent.add_child(instance)
 
 
 func _material(color: Color) -> StandardMaterial3D:

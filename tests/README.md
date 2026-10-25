@@ -12,7 +12,7 @@ En macOS se detecta `/Applications/Godot.app/Contents/MacOS/Godot`. También pue
 GODOT_BIN="/Applications/Godot.app/Contents/MacOS/Godot" bash scripts/run_tests.sh
 ```
 
-El script primero importa el proyecto y después ejecuta `test_runner.gd`, `test_input.gd` y `test_polish.gd` en modo headless. No requiere plugins ni conexión a internet. Los comandos propagan su código de salida; el runner también rechaza errores registrados por Godot aunque el proceso devolviera cero. Una aserción fallida termina con código 1; cada suite tiene un watchdog de 60 segundos que termina con código 124 si un error interrumpe la ejecución antes de finalizar.
+El script primero importa el proyecto y después ejecuta `test_runner.gd`, `test_input.gd`, `test_polish.gd` y `test_models.gd` en modo headless. No requiere plugins ni conexión a internet. Los comandos propagan su código de salida; el runner también rechaza errores registrados por Godot aunque el proceso devolviera cero. Una aserción fallida termina con código 1; cada suite tiene un watchdog de 60 segundos que termina con código 124 si un error interrumpe la ejecución antes de finalizar.
 
 La suite instancia la escena principal y ejecuta 11 grupos de integración:
 
@@ -36,6 +36,8 @@ La suite `test_polish.gd` añade 70 comprobaciones de integración de la present
 
 Las comprobaciones de audio verifican que haya streams PCM no vacíos y que el mute, la pausa y la selección de voces funcionen. **No equivalen a escuchar los sonidos ni a validar su volumen en un teléfono.**
 
+La suite `test_models.gd` añade 62 comprobaciones y carga los GLB reales de esqueleto, espada, torre y flecha. Comprueba materiales con texturas, recursos compartidos entre instancias, límites de geometría y resolución de texturas, y ausencia de colisiones añadidas por el arte. Ejercita caminar con huesos reales, ausencia de desplazamiento de la raíz por animación, espada vinculada al esqueleto, salud independiente de la reacción al golpe, pausa y reanudación. También apunta la torre hacia cuatro lados, comprueba que su base permanezca quieta, que la boca de disparo acompañe la orientación y las mejoras, y que el retroceso vuelva al reposo. La flecha debe conservar escala legible y eje longitudinal alineado con su vuelo. Estas comprobaciones no sustituyen revisar visualmente orientación, texturas o animaciones desde la cámara del juego.
+
 ## Partidas completas con combate real
 
 ```bash
@@ -48,6 +50,6 @@ Se ejecuta a diez veces la velocidad con 600 ticks de física por segundo para c
 
 Resultados ejecutados con el balance incluido y Godot 4.6.3: `first_one` completó la primera oleada con **20 vidas y 350 monedas**; `strategy` ganó las cinco con **19–20 vidas** en las ejecuciones observadas; `strategy_perfect` consiguió **20 vidas, 550 monedas y cuatro torres**. En la última ejecución, la estrategia estándar también terminó con 20 vidas, 550 monedas y cuatro torres; otra ejecución terminó con 19 vidas, 625 monedas y cinco torres. La temporización de apariciones por frame en la simulación acelerada puede cambiar una fuga y las compras posteriores. Los tres procesos terminaron con código 0. Estos resultados prueban estrategias concretas, sin garantizar una partida perfecta con cualquier distribución de torres.
 
-La ejecución de referencia con Godot **4.6.3** completó **249 comprobaciones: 143 de gameplay, 36 de entrada y 70 de presentación, 0 fallos**, además de las tres simulaciones. La salida del comando actual es siempre la autoridad para una revisión posterior.
+La ejecución de referencia con los modelos importados y Godot **4.6.3** completó **311 comprobaciones: 143 de gameplay, 36 de entrada, 70 de presentación y 62 de modelos, 0 fallos**. La salida del comando actual es siempre la autoridad para una revisión posterior; las simulaciones adicionales se informan por separado.
 
 El modo headless no verifica apariencia, interacción con dedos reales, notch, rendimiento, exportación ni comportamiento de iOS/Android. Estos puntos necesitan las verificaciones manuales descritas en la documentación principal.
