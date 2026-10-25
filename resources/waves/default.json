@@ -1,7 +1,7 @@
 [
   {"count": 6, "health": 48.0, "speed": 1.25, "spawn_interval": 1.7},
-  {"count": 9, "health": 85.0, "speed": 1.35, "spawn_interval": 1.4},
-  {"count": 12, "health": 140.0, "speed": 1.45, "spawn_interval": 1.1},
-  {"count": 16, "health": 215.0, "speed": 1.55, "spawn_interval": 0.9},
-  {"count": 22, "health": 320.0, "speed": 1.65, "spawn_interval": 0.72}
+  {"count": 9, "health": 110.0, "speed": 1.4, "spawn_interval": 1.3},
+  {"count": 12, "health": 180.0, "speed": 1.5, "spawn_interval": 1.0},
+  {"count": 16, "health": 250.0, "speed": 1.6, "spawn_interval": 0.85},
+  {"count": 22, "health": 300.0, "speed": 1.65, "spawn_interval": 0.8}
 ]

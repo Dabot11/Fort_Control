@@ -22,8 +22,8 @@ func _run() -> void:
 	var arguments := OS.get_cmdline_user_args()
 	if not arguments.is_empty():
 		mode = arguments[0]
-	if mode not in ["first_one", "strategy"]:
-		push_error("Mode must be first_one or strategy")
+	if mode not in ["first_one", "strategy", "strategy_perfect"]:
+		push_error("Mode must be first_one, strategy or strategy_perfect")
 		quit(2)
 		return
 	# Ten times real time, preserving the normal 1/60 simulated physics timestep.
@@ -65,6 +65,8 @@ func _run() -> void:
 		_check(game.waves.current_wave == 5 and not game.waves.active, "all five waves complete")
 		_check(game.waves.pending_count == 0 and game.waves.living_count == 0, "victory has no unresolved enemies")
 		_check(game.castle.health > 0, "castle survives the real battle")
+		if mode == "strategy_perfect":
+			_check(game.castle.health == int(game.balance.castle_health), "efficient placement and upgrades can finish all five waves without leaks")
 	print("GAMEPLAY_RESULT ", JSON.stringify({
 		"mode": mode, "state": game.state, "history": history,
 		"purchases": purchases, "wall_ms": Time.get_ticks_msec() - started,
@@ -72,7 +74,8 @@ func _run() -> void:
 	}))
 	paused = false
 	game.free()
-	await process_frame
+	# Drain AudioServer's asynchronous playback cleanup, even at time_scale 10.
+	await create_timer(0.15, true, false, true).timeout
 	quit(1 if failed else 0)
 
 
@@ -96,16 +99,18 @@ func _buy(index: int) -> bool:
 
 func _shop() -> void:
 	# Use the same gameplay API as buttons, spending only earned gold between waves.
-	for index in [3, 5, 2]:
+	var upgrade_order := [3, 2, 5] if mode == "strategy_perfect" else [3, 5, 2]
+	var build_order := [1, 4, 7, 6, 0] if mode == "strategy_perfect" else [4, 7, 1, 6, 0]
+	for index in upgrade_order:
 		var slot: FortBuildSlot = game.map.slots[index]
 		if slot.occupied and slot.tower.level == 1:
 			if game.upgrade_tower(slot):
 				purchases.append("upgrade2:%d" % index)
-	for index in [3, 5, 2]:
+	for index in upgrade_order:
 		var slot: FortBuildSlot = game.map.slots[index]
 		if slot.occupied and slot.tower.level == 2:
 			if game.upgrade_tower(slot):
 				purchases.append("upgrade3:%d" % index)
-	for index in [4, 7, 1, 6, 0]:
+	for index in build_order:
 		if not game.map.slots[index].occupied:
 			_buy(index)

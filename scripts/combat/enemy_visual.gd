@@ -11,6 +11,7 @@ var _health_bar: Node3D
 var _health_fill: MeshInstance3D
 var _phase := 0.0
 var _health_ratio := 1.0
+var _hit_time := 0.0
 
 
 func _ready() -> void:
@@ -69,6 +70,19 @@ func animate_walk(delta: float, speed: float) -> void:
 	_right_arm.rotation.x = swing * 0.65 - 0.2
 	_body.position.y = absf(sin(_phase)) * 0.035
 	_body.rotation.z = sin(_phase) * 0.025
+
+
+func show_hit() -> void:
+	_hit_time = 0.15
+
+
+func _process(delta: float) -> void:
+	if _hit_time <= 0.0 or not is_instance_valid(_body):
+		return
+	_hit_time = maxf(0.0, _hit_time - delta)
+	var strength := _hit_time / 0.15
+	_body.scale = Vector3.ONE * (1.0 + strength * 0.12)
+	_body.position.x = sin(strength * TAU) * strength * 0.035
 
 
 func set_health_ratio(ratio: float) -> void:

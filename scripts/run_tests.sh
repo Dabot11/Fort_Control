@@ -8,7 +8,7 @@ for fort_argument in "$@"; do
     --gameplay) FORT_RUN_GAMEPLAY=true ;;
     --help|-h)
       echo 'Uso: bash scripts/run_tests.sh [--gameplay]'
-      echo '--gameplay añade dos partidas con combate real para verificar el balance.'
+      echo '--gameplay añade tres partidas con combate real para verificar el balance.'
       exit 0
       ;;
     *) echo "Argumento desconocido: $fort_argument" >&2; exit 2 ;;
@@ -43,7 +43,9 @@ run_godot() {
 run_godot --headless --path "$PROJECT_DIR" --editor --import --quit
 run_godot --headless --path "$PROJECT_DIR" --script res://tests/test_runner.gd
 run_godot --headless --path "$PROJECT_DIR" --script res://tests/test_input.gd
+run_godot --headless --path "$PROJECT_DIR" --script res://tests/test_polish.gd
 if [[ "$FORT_RUN_GAMEPLAY" == true ]]; then
   run_godot --headless --path "$PROJECT_DIR" --script res://tests/test_gameplay.gd -- first_one
   run_godot --headless --path "$PROJECT_DIR" --script res://tests/test_gameplay.gd -- strategy
+  run_godot --headless --path "$PROJECT_DIR" --script res://tests/test_gameplay.gd -- strategy_perfect
 fi

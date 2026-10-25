@@ -1,6 +1,8 @@
 # Fort Control
 
-Un Tower Defense 3D de fantasía medieval, hecho con **Godot 4.6.3 estándar y GDScript**. Construye ballestas en las casillas `+`, mejora tus defensas y protege la fortaleza durante cinco oleadas de esqueletos. El juego funciona sin internet, cuentas ni servicios externos.
+Un Tower Defense 3D de fantasía medieval, hecho con **Godot 4 estándar y GDScript**. Construye ballestas en las casillas `+`, mejora tus defensas y protege la fortaleza durante cinco oleadas de esqueletos. El juego funciona sin internet, cuentas ni servicios externos.
+
+Las pruebas automatizadas usan **Godot 4.6.3**. El MVP ya cuenta con una partida completa reportada en **iPhone 16 Pro con Godot 4.7.2**; esta actualización necesita una nueva prueba en el teléfono. Los resultados y las versiones utilizadas están en [validación](docs/validation.md).
 
 ## Qué incluye
 
@@ -10,17 +12,19 @@ Un Tower Defense 3D de fantasía medieval, hecho con **Godot 4.6.3 estándar y G
 - 300 monedas y 20 puntos de vida iniciales; cinco oleadas de dificultad creciente.
 - Cámara isométrica ortográfica, selección, arrastre y zoom con mouse o pantalla táctil.
 - Interfaz en español, pausa, victoria, derrota y reinicio.
+- Efectos de combate, construcción y mejoras, sonidos locales y control de sonido desde pausa.
+- Indicadores de alcance y comparación de estadísticas antes de mejorar una ballesta.
 - Recursos de balance editables y pruebas automatizadas sin ventana.
 
 Todos los modelos provisionales se crean con geometría nativa de Godot. No necesitas Blender, Meshy, plugins ni descargar paquetes de arte para jugar.
 
 <img src="docs/images/fort-control.png" alt="Fort Control: ballestas defendiendo el camino al castillo y panel de mejoras" width="360">
 
-Captura real del MVP con el renderizador Mobile en Linux. No representa una prueba en hardware móvil.
+Captura de esta iteración con el renderizador Mobile en Linux: comparación de mejoras, alcance actual y próximo, y oro obtenido. La nueva versión todavía requiere repetición en el iPhone.
 
 ## Jugar en una Mac con Apple Silicon
 
-1. Descarga **Godot 4.6.3 Standard para macOS, Universal** desde el [archivo oficial de versiones](https://godotengine.org/download/archive/4.6.3-stable/). No necesitas la edición .NET.
+1. Usa **Godot Standard para macOS, Universal**, disponible en el [archivo oficial de versiones](https://godotengine.org/download/archive/). El recorrido de iPhone reportado por el usuario usa **4.7.2**; si ya tienes esa instalación funcionando, consérvala. Cloud mantiene **4.6.3** como referencia de pruebas. No necesitas la edición .NET.
 2. Descomprime la descarga y arrastra **Godot.app** a **Aplicaciones**. Ábrela desde Finder. Si macOS pide confirmar la apertura, usa la opción que ofrece el sistema para esa aplicación; no desactives las comprobaciones de seguridad globales.
 3. Abre **Terminal**. Si todavía no tienes Git, ejecuta `xcode-select --install` y termina la instalación de las herramientas de Apple.
 4. Clona el proyecto y entra en su carpeta:
@@ -49,6 +53,19 @@ El proyecto usa el renderizador **Mobile**. Si tu equipo presenta un problema de
 /Applications/Godot.app/Contents/MacOS/Godot --path . --rendering-method gl_compatibility
 ```
 
+## Actualizar una copia que ya exporta a iPhone
+
+Conserva los ajustes locales de `project.godot` y `export_presets.cfg`, incluidos tu Team ID y preset iOS. Esta actualización cambia el juego y mantiene esos dos archivos como estaban en el repositorio.
+
+Desde la carpeta del proyecto:
+
+```bash
+git status --short
+git pull --ff-only origin main
+```
+
+Si Git indica un conflicto con cambios locales, revisa los archivos afectados conservando tus ajustes. Después abre el proyecto con la misma versión de Godot que utilizaste para exportar, reimporta y genera de nuevo el proyecto Xcode. La exportación anterior no incorpora automáticamente los cambios del repositorio.
+
 ## Controles y reglas
 
 | Acción | Mouse y teclado | Pantalla táctil |
@@ -59,9 +76,14 @@ El proyecto usa el renderizador **Mobile**. Si tu equipo presenta un problema de
 | Construir o mejorar | Botón del panel contextual | Botón del panel contextual |
 | Iniciar siguiente oleada | Botón, Espacio o Enter | Botón inferior |
 | Pausar o continuar | Botón, Escape o P | Botón de pausa |
+| Activar o silenciar efectos de sonido | Control de sonido en pausa | Control de sonido en pausa |
 | Reiniciar | Botón del menú | Botón del menú |
 
 Arrastrar la cámara no construye una torre: la construcción siempre requiere confirmar en el panel. La siguiente oleada se habilita cuando termina la anterior. Puedes construir y mejorar durante una oleada si tienes oro. Las casillas del camino no permiten construir.
+
+Al seleccionar una casilla vacía, el anillo **cian** muestra el alcance de una ballesta de nivel 1. En una torre construida, cian es el alcance actual y el anillo **dorado discontinuo** anticipa el siguiente nivel. El panel compara daño, alcance y ataques por segundo antes de gastar; nivel 3 es el máximo.
+
+Los menús de pausa y resultado incluyen **Sonido: activado / desactivado**. La preferencia se conserva al reiniciar la partida durante la misma sesión, pero no se guarda al cerrar la aplicación. Los sonidos se generan localmente y no requieren internet ni archivos externos.
 
 Cada esqueleto eliminado entrega 25 monedas una sola vez. Cada esqueleto que llega al final del camino resta una vida y no entrega monedas. Ganas al resolver los enemigos de las cinco oleadas con vida restante; pierdes cuando la vida llega a cero. Reiniciar comienza una partida limpia.
 
@@ -84,11 +106,11 @@ La lógica de movimiento y combate vive en `scripts/combat/enemy.gd`; la represe
 1. Exporta el modelo como `.glb`, comprueba su licencia y coloca el archivo en `assets/characters/`. No incluyas claves de Meshy ni archivos privados de tu cuenta.
 2. Deja que Godot lo importe. Abre el modelo para revisar escala, materiales y animaciones. Ajusta la escala de su nodo visual, sin cambiar las coordenadas del enemigo ni las casillas del mapa.
 3. Crea una escena visual propia que instancie el GLB. El enemigo mira hacia el eje local `-Z` y sus pies deben quedar cerca del origen.
-4. Adapta el nodo `Visual` creado por `enemy.gd`, conservando los métodos `animate_walk(delta, speed)` y `set_health_ratio(ratio)` que usa la lógica. Puedes implementarlos en un script envoltorio para el modelo importado, sin modificar los archivos generados por el importador.
+4. Adapta el nodo `Visual` creado por `enemy.gd`, conservando los métodos `animate_walk(delta, speed)`, `set_health_ratio(ratio)` y `show_hit()` que usa la lógica. Puedes implementarlos en un script envoltorio para el modelo importado, sin modificar los archivos generados por el importador.
 5. Si el GLB tiene `AnimationPlayer`, asigna sus clips a **Idle**, **Walk**, **Attack** y **Death**. Verifica los nombres reales: no todos los modelos exportan esas pistas ni usan los mismos nombres.
 6. Repite las pruebas y juega una oleada para confirmar orientación, escala, animación y legibilidad desde la cámara.
 
-En este MVP el esqueleto camina y desaparece al morir o llegar al castillo. **Attack** no se utiliza porque no hay combate cuerpo a cuerpo. Para reproducir **Death** completo, conserva inmediatamente el estado lógico de enemigo muerto y reproduce una copia visual sin colisiones antes de retirarla; la animación nunca debe volver a entregar oro ni retrasar el estado lógico de la oleada.
+En este MVP el esqueleto camina y se retira al morir o llegar al castillo; al morir deja un efecto breve de fragmentos y recompensa. **Attack** no se utiliza porque no hay combate cuerpo a cuerpo. Para reproducir **Death** completo, conserva inmediatamente el estado lógico de enemigo muerto y reproduce una copia visual sin colisiones antes de retirarla; la animación nunca debe volver a entregar oro ni retrasar el estado lógico de la oleada.
 
 ## Ejecutar las pruebas
 
@@ -106,7 +128,7 @@ bash scripts/run_tests.sh
 
 El script importa el proyecto y ejecuta la suite sin ventana. Un error de importación o una prueba fallida produce un código de salida distinto de cero. Los resultados de una ejecución concreta y la cobertura manual pendiente se registran en [`docs/validation.md`](docs/validation.md).
 
-Para ejecutar también las simulaciones completas de balance —primera oleada con una ballesta y victoria mediante compras y mejoras—:
+Para ejecutar también tres simulaciones de balance —primera oleada con una ballesta, estrategia de referencia y estrategia alternativa sin fugas—:
 
 ```bash
 bash scripts/run_tests.sh --gameplay
@@ -122,22 +144,22 @@ godot --headless --path . --editor --import --quit
 
 Si usas el ejecutable de macOS sin alias, sustituye `godot` por `/Applications/Godot.app/Contents/MacOS/Godot`. La primera importación genera `.godot/`; esa caché no se versiona. Las pruebas headless verifican la lógica y la carga de escenas, pero no prueban el rendimiento gráfico ni los gestos en hardware móvil.
 
-## Primeras pruebas en iPhone o iPad
+## Ejecutar en iPhone o iPad
 
 Necesitas una Mac, **Xcode**, un dispositivo físico y la configuración de firma de tu propia cuenta de Apple. La preparación detallada está en [`docs/mobile-export.md`](docs/mobile-export.md).
 
 1. Abre Xcode, acepta sus condiciones e instala los componentes que solicite. Añade tu cuenta en sus ajustes y conecta el iPhone por cable.
-2. En Godot, abre **Editor → Administrar plantillas de exportación** e instala las plantillas que coincidan exactamente con **4.6.3**.
-3. En **Proyecto → Exportar**, selecciona el preset **iOS** incluido. Configura tu **Team ID** y un **Bundle Identifier** propio, selecciona iPhone/iPad y conserva la orientación vertical. En **Resources**, conserva `*.json` en el filtro de archivos que no son recursos para empaquetar mapa, balance y oleadas.
-4. Exporta el proyecto Xcode a una carpeta local ignorada, por ejemplo `build/ios/`. Si la salida es `.zip`, descomprímela.
-5. Abre el proyecto exportado en Xcode, selecciona tu equipo de firma y tu dispositivo. Activa **Developer Mode** en el iPhone si el sistema lo solicita y ejecuta **Run**.
+2. En Godot, abre **Editor → Administrar plantillas de exportación** e instala las plantillas que coincidan exactamente con **la versión del editor que estás usando**: 4.7.2 en el recorrido de iPhone ya probado por el usuario. Habilita **Import ETC2 ASTC** en los ajustes de compresión de texturas si el exportador lo solicita.
+3. En **Proyecto → Exportar**, selecciona el preset **iOS** incluido. Configura tu **Team ID** y un **Bundle Identifier** propio, activa **Application → Export Project Only** y conserva la orientación vertical. En **Resources**, conserva el filtro `*.json`.
+4. Exporta el proyecto Xcode a una carpeta local ignorada, por ejemplo `build/ios/`. Si la salida es `.zip`, descomprímela. Abre el archivo **`.xcodeproj`** generado.
+5. En Xcode, selecciona tu **Personal Team**, firma automática y el **iPhone físico** conectado. Para este flujo usa **Apple Development** como identidad de firma en Debug y Release. Activa **Developer Mode** en el iPhone si lo solicita y ejecuta **Run**.
 6. Revisa notch, zona segura inferior, selección, arrastre, pellizco, pausa y una partida completa. Usa la lista de [`docs/validation.md`](docs/validation.md).
 
-No se incluyen certificados, perfiles ni identificadores de firma. La cuenta de Apple y sus restricciones determinan las posibilidades de instalación o distribución. La exportación y el funcionamiento en dispositivos físicos deben comprobarse en ese hardware.
+Para probar en tu propio iPhone puedes usar una cuenta Apple gratuita con Personal Team; no necesitas la membresía pagada. La firma gratuita normalmente vence a los siete días y se renueva compilando e instalando otra vez desde Xcode. La guía explica cómo obtener el Team ID real desde `project.pbxproj`, sin publicar datos de firma. La nueva versión debe volver a comprobarse en el teléfono aunque el MVP base ya haya funcionado.
 
 ## Preparar Android
 
-Instala **OpenJDK 17**, Android Studio y los componentes del SDK indicados en [`docs/mobile-export.md`](docs/mobile-export.md). Configura las rutas de Java y Android en los ajustes del editor de Godot, instala las plantillas **4.6.3**, completa el identificador de aplicación del preset **Android** incluido, conserva `*.json` en el filtro de archivos de **Resources** y exporta un APK de depuración a `build/android/` para la primera prueba en un teléfono con depuración USB.
+Instala **OpenJDK 17**, Android Studio y los componentes del SDK indicados en [`docs/mobile-export.md`](docs/mobile-export.md). Configura las rutas de Java y Android en los ajustes del editor de Godot, instala las plantillas que correspondan a ese editor, completa el identificador de aplicación del preset **Android** incluido, conserva `*.json` en el filtro de archivos de **Resources** y exporta un APK de depuración a `build/android/` para la primera prueba en un teléfono con depuración USB. Los requisitos de SDK documentados se refieren a Godot 4.6; revísalos si usas otra versión.
 
 No necesitas permisos de internet para el juego. No guardes contraseñas de firma ni keystores dentro del repositorio. Una publicación en Google Play requiere preparar y firmar su propio AAB; no forma parte de esta entrega.
 
@@ -154,6 +176,7 @@ No necesitas permisos de internet para el juego. No guardes contraseñas de firm
 | `scripts/combat/` | Enemigos, torres, proyectiles y modelos provisionales |
 | `scripts/camera/` | Cámara ortográfica y gestos |
 | `scripts/ui/` | HUD, selección y menús |
+| `scripts/feedback/` | Respuesta visual y sonora a eventos de juego |
 | `resources/` | Configuración del mapa y balance |
 | `tests/` | Verificaciones automatizadas |
 | `docs/` | Balance, arquitectura, exportación y validación |
@@ -162,10 +185,10 @@ Consulta [`docs/architecture.md`](docs/architecture.md) para entender cómo se c
 
 ## Limitaciones y próximos pasos
 
-- Un mapa, un tipo de torre y un tipo de enemigo. No hay guardado, audio, backend, anuncios ni compras.
+- Un mapa, un tipo de torre y un tipo de enemigo. No hay guardado de partidas, backend, anuncios ni compras.
 - El arte es provisional y se genera con nodos nativos; los efectos y animaciones son sencillos.
-- El balance inicial requiere sesiones de juego con personas para ajustar dificultad y ritmo.
+- El balance incorpora la observación de que las primeras cuatro oleadas eran fáciles y la quinta concentraba el salto de dificultad. Necesita otra partida humana para comprobar el nuevo ritmo.
 - La orientación móvil es vertical. La interfaz se adapta a otras proporciones de ventana, pero su experiencia principal es portrait.
-- El soporte de gestos está implementado; compatibilidad, zonas seguras, consumo y rendimiento en iPhone, iPad y Android físicos necesitan validación posterior.
+- El MVP base ya tiene una partida completa reportada en iPhone 16 Pro. La nueva iteración, otros iPhone, iPad y Android necesitan validación; todavía no hay mediciones de consumo o rendimiento en teléfonos.
 
-La siguiente tarea recomendada es **probar una partida completa en un iPhone y un Android de gama media**, medir tiempos de fotograma y ajustar legibilidad, controles y balance con esos resultados. Después se pueden sustituir los modelos provisionales manteniendo la lógica actual.
+El siguiente paso es **repetir las cinco oleadas en el mismo iPhone 16 Pro**, comprobar audio, efectos, comparación de mejoras y el ritmo de las oleadas 2–5. Después conviene probar un Android de gama media y medir tiempos de fotograma antes de sustituir los modelos provisionales. Los cambios de esta iteración están resumidos en [`docs/changelog.md`](docs/changelog.md).

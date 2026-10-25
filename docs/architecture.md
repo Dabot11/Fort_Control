@@ -15,6 +15,10 @@ La escena `scenes/main/main.tscn` es el punto de entrada. Su coordinador, `FortG
 | `FortProjectile` | Seguimiento visual e impacto único |
 | `FortCamera` | Pan, zoom, límites y selección mediante raycast |
 | `FortHUD` | Valores mostrados, panel contextual y menús |
+| `FortFeedback` | Respuesta audiovisual a eventos ya resueltos, límites de efectos y estado de sonido |
+| `FortSoundBank` | Generación y caché de sonidos PCM propios, sin servicios ni recursos de terceros |
+| `FortTransientEffect` | Efectos visuales temporales con vida limitada |
+| `FortRangeIndicator` | Alcance actual y próximo nivel de la casilla seleccionada |
 
 ## Flujo de partida
 
@@ -34,6 +38,20 @@ Los modelos provisionales de enemigos y torres están separados de sus reglas de
 No se usan cuerpos físicos para mover esqueletos ni navegación dinámica: el camino está definido como puntos y el movimiento consume distancia sobre cada segmento. Las torres no alteran ese recorrido. Las colisiones de construcción se reservan para selección; no deben impedir el paso.
 
 Las escenas de enemigo, torre y proyectil ofrecen puntos de entrada reutilizables. La mayor parte de la geometría provisional se crea en código para que el proyecto sea autónomo y mantenga pocos recursos externos.
+
+## Respuesta visual y sonora
+
+El coordinador envía los eventos de disparo, impacto, eliminación, construcción, mejora, daño al castillo, inicio de oleada y resultado a `FortFeedback`. Esta capa presenta lo que ya ocurrió: no aplica daño, no cobra oro y no decide quién gana. Las señales y estados de combate mantienen su responsabilidad original.
+
+`FortSoundBank` sintetiza nueve sonidos propios y los conserva en memoria como PCM mono de 16 bits a 22 050 Hz. No se descargan archivos ni se requiere un plugin. El banco y sus límites están documentados en `assets/audio/README.md`.
+
+El feedback admite como máximo **48 grupos de efectos transitorios** y **8 voces de audio**: siete para gameplay que obedecen la pausa y una para el resultado, que puede sonar con la simulación detenida. Son límites de concurrencia del diseño, no una medición de rendimiento en teléfonos. El reinicio retira los efectos y sonidos de la partida anterior.
+
+Los efectos incluyen destello de disparo e impacto, fragmentos de hueso con el oro obtenido, anillos al construir o mejorar y aviso de vida perdida en el castillo. El modelo del enemigo puede reaccionar al impacto y la ballesta muestra retroceso; estos movimientos son visuales y no cambian el recorrido ni la cadencia lógica.
+
+`FortRangeIndicator` representa el alcance horizontal en el suelo: cian para el nivel actual o una construcción nueva, y dorado discontinuo para la siguiente mejora. El HUD deriva la comparación de estadísticas del mismo arreglo `tower_levels` usado por combate y economía. En nivel 3 desaparece la anticipación de mejora.
+
+El control de sonido de los menús emite una solicitud al coordinador. El estado se conserva al reiniciar una partida dentro de la sesión, sin persistencia en disco. El contador de vida y el mensaje de oleada proporcionan señales visuales incluso con audio silenciado.
 
 ## Límites que deben conservarse
 

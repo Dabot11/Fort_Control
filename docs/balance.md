@@ -40,10 +40,10 @@ Archivo: `resources/waves/default.json`. Cada objeto representa una oleada, en o
 | Oleada | `count` | `health` | `speed` | `spawn_interval` |
 | --- | ---: | ---: | ---: | ---: |
 | 1 | 6 | 48.0 | 1.25 | 1.70 |
-| 2 | 9 | 85.0 | 1.35 | 1.40 |
-| 3 | 12 | 140.0 | 1.45 | 1.10 |
-| 4 | 16 | 215.0 | 1.55 | 0.90 |
-| 5 | 22 | 320.0 | 1.65 | 0.72 |
+| 2 | 9 | 110.0 | 1.40 | 1.30 |
+| 3 | 12 | 180.0 | 1.50 | 1.00 |
+| 4 | 16 | 250.0 | 1.60 | 0.85 |
+| 5 | 22 | 300.0 | 1.65 | 0.80 |
 
 - `count`: cantidad total de esqueletos de la oleada; entero mayor que cero.
 - `health`: vida de cada esqueleto, mayor que cero.
@@ -51,6 +51,14 @@ Archivo: `resources/waves/default.json`. Cada objeto representa una oleada, en o
 - `spawn_interval`: separación temporal entre apariciones, mayor que cero.
 
 Hay 65 enemigos en total. Aumentar vida, velocidad o cantidad eleva la dificultad; reducir el intervalo concentra el ataque. Cambia un parámetro por vez y juega la partida completa para evitar una primera oleada demasiado exigente o un final trivial.
+
+### Motivo de esta revisión
+
+En la partida del MVP base `82365e0`, el usuario reportó que las primeras cuatro oleadas eran fáciles y que la quinta exigía más cuidado para evitar perder vida. Esta revisión distribuye antes la presión: sube vida y velocidad moderadamente en las oleadas 2–4 y acerca sus apariciones. La quinta tiene algo menos de vida por enemigo y más separación entre apariciones para reducir el salto final.
+
+La primera oleada conserva sus parámetros de introducción. También se mantienen cantidad de enemigos, economía y estadísticas de las torres, de modo que el ajuste se concentre en el ritmo de las oleadas. El alcance y las comparaciones visibles de mejoras usan estos mismos datos de torre, sin un balance separado para la interfaz.
+
+Las simulaciones sirven para comprobar que existen estrategias ganadoras y que invertir en defensas importa; el ritmo percibido debe confirmarse en una nueva partida humana. El [experimento de balance](balance-experiment.md) detalla la comparación y las compras de una estrategia sin fugas. Consulta [validación](validation.md) para separar resultados del MVP original, pruebas de esta revisión y reporte del usuario.
 
 ## Mapa
 

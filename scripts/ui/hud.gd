@@ -9,6 +9,7 @@ signal restart_requested
 signal build_requested
 signal upgrade_requested
 signal close_requested
+signal sound_toggled(muted: bool)
 
 const INK := Color("122b35")
 const PANEL := Color("173743")
@@ -37,12 +38,16 @@ var _overlay_title: Label
 var _overlay_description: Label
 var _resume_button: Button
 var _restart_button: Button
+var _sound_button: Button
 var _slot: FortBuildSlot
 var _tower_levels: Array = []
 var _gold := 0
 var _result_shown := false
 var _paused := false
 var _notice_time := 0.0
+var _sound_muted := false
+var _health_flash_remaining := 0.0
+var _health_color := CREAM
 
 
 func _ready() -> void:
@@ -54,10 +59,19 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	# The menu remains interactive while paused; gameplay notices freeze with it.
+	if get_tree().paused:
+		return
 	if _notice_time > 0.0:
 		_notice_time -= delta
 		if _notice_time <= 0.0:
 			_message.text = "Toca una casilla + para construir"
+			_message.add_theme_color_override("font_color", CREAM)
+	if _health_flash_remaining > 0.0:
+		_health_flash_remaining = maxf(0.0, _health_flash_remaining - delta)
+		var strength := _health_flash_remaining / 0.45
+		_health_value.add_theme_color_override("font_color", _health_color.lerp(Color("ff8a68"), strength))
+		_health_value.scale = Vector2.ONE * (1.0 + 0.10 * strength)
 
 
 func _build_ui() -> void:
@@ -141,6 +155,7 @@ func _build_ui() -> void:
 	context_content.add_child(_context_action)
 	_context_hint = _label("", 17, MUTED)
 	_context_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_context_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	context_content.add_child(_context_hint)
 
 	_wave_button = _button("INICIAR OLEADA 1  →", GOLD)
@@ -190,6 +205,14 @@ func _build_ui() -> void:
 	_resume_button.name = "ResumeButton"
 	_resume_button.pressed.connect(func() -> void: resume_requested.emit())
 	result_box.add_child(_resume_button)
+	_sound_button = _button("Sonido: activado", CREAM)
+	_sound_button.name = "SoundToggleButton"
+	_sound_button.pressed.connect(func() -> void:
+		set_sound_muted(not _sound_muted)
+		sound_toggled.emit(_sound_muted)
+	)
+	result_box.add_child(_sound_button)
+	set_sound_muted(_sound_muted)
 	_restart_button = _button("Reiniciar partida", BLUE)
 	_restart_button.name = "RestartButton"
 	_restart_button.pressed.connect(func() -> void: restart_requested.emit())
@@ -200,7 +223,9 @@ func update_status(gold: int, health: int, wave: int, total: int, can_start: boo
 	_gold = gold
 	_gold_value.text = str(gold)
 	_health_value.text = str(health)
-	_health_value.add_theme_color_override("font_color", Color("ef9d88") if health <= 5 else CREAM)
+	_health_color = Color("ef9d88") if health <= 5 else CREAM
+	if _health_flash_remaining <= 0.0:
+		_health_value.add_theme_color_override("font_color", _health_color)
 	_wave_value.text = "%d / %d" % [wave, total]
 	_wave_button.disabled = not can_start or _paused or _result_shown
 	if can_start:
@@ -230,20 +255,26 @@ func _refresh_context() -> void:
 		var level: int = tower.level
 		var stats: Dictionary = tower.stats()
 		_context_title.text = "Ballesta · Nivel %d" % level
-		_context_details.text = "Daño %d   ·   Alcance %.1f\n%.2f ataques/s" % [int(stats.damage), float(stats.range), 1.0 / float(stats.interval)]
 		if level >= _tower_levels.size():
+			_context_details.text = "Daño %d   ·   Alcance %.1f\n%.2f ataques/s · Alcance en azul" % [int(stats.damage), float(stats.range), 1.0 / float(stats.interval)]
 			_context_action.text = "NIVEL MÁXIMO"
 			_context_action.disabled = true
 			_context_hint.text = "Defensa completamente mejorada"
 		else:
-			var next_cost := int(_tower_levels[level].cost)
+			var next_stats: Dictionary = _tower_levels[level]
+			var next_cost := int(next_stats.cost)
+			_context_details.text = "Daño %d → %d   ·   Alcance %.1f → %.1f\nAtaques/s %.2f → %.2f" % [
+				int(stats.damage), int(next_stats.damage), float(stats.range), float(next_stats.range),
+				1.0 / float(stats.interval), 1.0 / float(next_stats.interval)
+			]
 			_context_action.text = "Mejorar a nivel %d · %d oro" % [level + 1, next_cost]
 			_context_action.disabled = _gold < next_cost
-			_context_hint.text = "Faltan %d monedas" % (next_cost - _gold) if _gold < next_cost else "Más daño, alcance y velocidad de ataque"
+			_context_hint.text = "Faltan %d monedas · Azul: actual / Dorado: mejora" % (next_cost - _gold) if _gold < next_cost else "Azul: alcance actual · Dorado: después de mejorar"
 	else:
-		var cost := int(_tower_levels[0].cost)
+		var initial_stats: Dictionary = _tower_levels[0]
+		var cost := int(initial_stats.cost)
 		_context_title.text = "Construir ballesta"
-		_context_details.text = "Ataca automáticamente al enemigo más avanzado."
+		_context_details.text = "Daño %d   ·   Alcance %.1f\n%.2f ataques/s · Alcance en azul" % [int(initial_stats.damage), float(initial_stats.range), 1.0 / float(initial_stats.interval)]
 		_context_action.text = "Construir · %d oro" % cost
 		_context_action.disabled = _gold < cost
 		_context_hint.text = "Faltan %d monedas" % (cost - _gold) if _gold < cost else "Una torre por casilla · 3 niveles de mejora"
@@ -265,7 +296,29 @@ func clear_selection() -> void:
 
 func show_message(text: String) -> void:
 	_message.text = text
+	_message.add_theme_color_override("font_color", CREAM)
 	_notice_time = 3.5
+
+
+func announce_wave(number: int, total: int) -> void:
+	show_message("OLEADA %d / %d · ¡Defiende la fortaleza!" % [number, total])
+	_message.add_theme_color_override("font_color", GOLD)
+
+
+func set_sound_muted(value: bool) -> void:
+	_sound_muted = value
+	if is_instance_valid(_sound_button):
+		_sound_button.text = "Sonido: desactivado" if value else "Sonido: activado"
+		_sound_button.tooltip_text = "Activar efectos de sonido" if value else "Silenciar efectos de sonido"
+
+
+func flash_castle_damage(amount: int) -> void:
+	if amount <= 0 or not is_instance_valid(_health_value):
+		return
+	_health_flash_remaining = 0.45
+	_health_value.pivot_offset = _health_value.size * 0.5
+	_health_value.add_theme_color_override("font_color", Color("ff8a68"))
+	_health_value.scale = Vector2.ONE * 1.10
 
 
 func set_paused(value: bool) -> void:
@@ -387,6 +440,9 @@ func reset_hud() -> void:
 	_result_shown = false
 	_paused = false
 	_notice_time = 0.0
+	_health_flash_remaining = 0.0
+	_health_value.scale = Vector2.ONE
+	_health_value.add_theme_color_override("font_color", _health_color)
 	_slot = null
 	_tower_levels = []
 	_context.hide()
@@ -395,4 +451,6 @@ func reset_hud() -> void:
 	_pause_button.disabled = false
 	_wave_button.disabled = false
 	_message.text = "Toca una casilla + para construir"
+	_message.add_theme_color_override("font_color", CREAM)
+	set_sound_muted(_sound_muted)
 	_overlay_title.remove_theme_color_override("font_color")

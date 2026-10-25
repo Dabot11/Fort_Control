@@ -53,6 +53,9 @@ func _run() -> void:
 	await _test_victory()
 	await _test_defeat()
 	await _test_pause_and_restart()
+	# AudioServer releases stopped WAV playbacks on its mixing thread. Give that
+	# thread one short real-time window after disposing every scene before exit.
+	await create_timer(0.15, true, false, true).timeout
 	print("\nFORT CONTROL TEST RESULTS: ", groups, " groups, ", checks, " checks, ", failures.size(), " failures")
 	if failures.is_empty():
 		print("PASS: all checks executed successfully.")

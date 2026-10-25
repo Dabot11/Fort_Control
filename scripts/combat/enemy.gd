@@ -4,6 +4,7 @@ extends Node3D
 
 signal killed(enemy: FortEnemy)
 signal escaped(enemy: FortEnemy)
+signal damaged(enemy: FortEnemy, amount: float)
 
 const VisualScript = preload("res://scripts/combat/enemy_visual.gd")
 
@@ -81,12 +82,18 @@ func _physics_process(delta: float) -> void:
 func take_damage(amount: float) -> void:
 	if not is_targetable() or amount <= 0.0:
 		return
+	var applied_damage := minf(amount, health)
 	health = maxf(0.0, health - amount)
-	_update_health_visual()
-	if health <= 0.0:
-		# Mark terminal before emitting: signal callbacks and other bolts are harmless.
+	var died := health <= 0.0
+	# Finish the logical transition before any presentation callbacks can run.
+	if died:
 		alive = false
 		set_physics_process(false)
+	_update_health_visual()
+	if is_instance_valid(visual):
+		visual.call("show_hit")
+	damaged.emit(self, applied_damage)
+	if died:
 		killed.emit(self)
 		queue_free()
 

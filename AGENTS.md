@@ -34,7 +34,7 @@ GODOT_BIN=/Applications/Godot.app/Contents/MacOS/Godot bash scripts/run_tests.sh
 
 Para cambios de gameplay, añade o adapta pruebas que comprueben el comportamiento afectado y ejecuta la suite. Para cambios de UI/cámara, complementa la carga headless con revisión visual y controles reales cuando haya entorno gráfico. No declares pruebas aprobadas si no terminaron o no ejercitaron el comportamiento.
 
-`bash scripts/run_tests.sh --gameplay` añade dos simulaciones con combate real para verificar primera oleada accesible y una estrategia ganadora de cinco oleadas. Ejecútalas cuando cambies balance, alcance, cadencia, movimiento o reglas de oleadas.
+`bash scripts/run_tests.sh --gameplay` añade tres simulaciones con combate real: primera oleada accesible, estrategia ganadora de cinco oleadas y estrategia sin pérdidas de vida. Ejecútalas cuando cambies balance, alcance, cadencia, movimiento o reglas de oleadas. La suite habitual también comprueba efectos, sonido, alcance y sus interacciones con pausa, reinicio y UI.
 
 Registra resultados y límites concretos en la entrega. No presentes una prueba headless como evidencia de rendimiento o compatibilidad de hardware móvil. Consulta `docs/validation.md` para la revisión manual.
 

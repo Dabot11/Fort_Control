@@ -2,6 +2,8 @@ class_name FortTower
 extends Node3D
 ## No economy coupling: GameManager validates and pays before calling upgrade.
 
+signal fired(at: Vector3)
+
 const VisualScript = preload("res://scripts/combat/tower_visual.gd")
 const ProjectileScript = preload("res://scripts/combat/projectile.gd")
 
@@ -65,6 +67,8 @@ func _physics_process(delta: float) -> void:
 	bolt.configure(_target, float(current["damage"]), _projectile_speed)
 	_projectiles_root.add_child(bolt)
 	bolt.global_position = visual.call("muzzle_position")
+	visual.call("play_recoil")
+	fired.emit(bolt.global_position)
 	_cooldown = maxf(float(current["interval"]), 0.05)
 
 

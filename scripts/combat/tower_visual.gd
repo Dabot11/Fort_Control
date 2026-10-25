@@ -5,6 +5,7 @@ static var _materials: Dictionary = {}
 var _level := 1
 var _model: Node3D
 var _head: Node3D
+var _recoil_time := 0.0
 
 
 func _ready() -> void:
@@ -32,7 +33,22 @@ func muzzle_position() -> Vector3:
 	return global_position + Vector3.UP
 
 
+func play_recoil() -> void:
+	_recoil_time = 0.16
+
+
+func _process(delta: float) -> void:
+	if _recoil_time <= 0.0 or not is_instance_valid(_head):
+		return
+	_recoil_time = maxf(0.0, _recoil_time - delta)
+	var kick := sin((_recoil_time / 0.16) * PI)
+	_head.position.x = sin(_head.rotation.y) * kick * 0.12
+	_head.position.z = cos(_head.rotation.y) * kick * 0.12
+	_head.rotation.x = -kick * 0.07
+
+
 func _rebuild() -> void:
+	_recoil_time = 0.0
 	var previous_yaw := 0.0
 	if is_instance_valid(_head):
 		previous_yaw = _head.rotation.y
