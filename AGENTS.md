@@ -38,6 +38,13 @@ Para cambios de gameplay, añade o adapta pruebas que comprueben el comportamien
 
 Registra resultados y límites concretos en la entrega. No presentes una prueba headless como evidencia de rendimiento o compatibilidad de hardware móvil. Consulta `docs/validation.md` para la revisión manual.
 
+## Publicación de pruebas Web
+
+- El usuario ha solicitado automatizar actualización, exportación y publicación de las versiones de prueba. `.github/workflows/web-preview.yml` comprueba y publica `main` en GitHub Pages; consulta `docs/web-preview.md` para la activación inicial.
+- Después de subir un cambio autorizado a `main`, comprueba el resultado del workflow y que `https://dabot11.github.io/Fort_Control/version.json` contiene el commit publicado antes de afirmar que el enlace está actualizado. Si falla, investiga el registro; no presentes un build local como despliegue realizado.
+- `bash scripts/export_web.sh` prepara una copia temporal con Compatibility y exporta a `build/web`. No cambies `project.godot` ni los presets nativos para preparar Web: el usuario conserva ajustes locales de firma de iOS.
+- Conserva los nombres de recursos con versión y la compilación Web sin hilos. No actives PWA, caché offline ni requisitos COOP/COEP sin revisar la compatibilidad con Safari y GitHub Pages.
+
 ## Repositorio público
 
 - Versiona fuentes `.gd`, escenas `.tscn`, recursos necesarios y archivos `.uid` generados junto a scripts. No versionar `.godot/` ni exportaciones.

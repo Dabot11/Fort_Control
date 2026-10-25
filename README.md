@@ -1,6 +1,6 @@
 # Fort Control
 
-Un Tower Defense 3D de fantasía medieval, hecho con **Godot 4 estándar y GDScript**. Construye ballestas en las casillas `+`, mejora tus defensas y protege la fortaleza durante cinco oleadas de esqueletos. El juego funciona sin internet, cuentas ni servicios externos.
+Un Tower Defense 3D de fantasía medieval, hecho con **Godot 4 estándar y GDScript**. Construye ballestas en las casillas `+`, mejora tus defensas y protege la fortaleza durante cinco oleadas de esqueletos. La aplicación nativa funciona sin internet; no hay cuentas ni servicios de juego externos.
 
 Las pruebas automatizadas usan **Godot 4.6.3**. El MVP ya cuenta con una partida completa reportada en **iPhone 16 Pro con Godot 4.7.2**; esta actualización necesita una nueva prueba en el teléfono. Los resultados y las versiones utilizadas están en [validación](docs/validation.md).
 
@@ -22,6 +22,14 @@ Los modelos de combate están incluidos como archivos GLB en `assets/models/`. E
 <img src="docs/images/fort-control.png" alt="Fort Control: ballestas defendiendo el camino al castillo y panel de mejoras" width="360">
 
 Captura con el renderizador Mobile en Linux. [Ver los modelos con la cámara acercada](docs/images/fort-control-models.png). La integración de los modelos todavía requiere una nueva partida en el iPhone para comprobar apariencia y rendimiento en el dispositivo.
+
+## Pruebas desde un enlace
+
+La publicación Web está preparada para [GitHub Pages](https://dabot11.github.io/Fort_Control/). Requiere habilitar **Settings → Pages → Source: GitHub Actions** una vez en el repositorio. Su estado se puede consultar en [Probar y publicar Web](https://github.com/Dabot11/Fort_Control/actions/workflows/web-preview.yml).
+
+Cada actualización de `main` ejecuta las pruebas y tres partidas automatizadas, exporta el juego y publica la versión nueva si todo pasa. Después basta abrir el enlace en Safari o recargarlo para comenzar una partida con la última versión publicada. La primera carga descarga el motor y los recursos; recargar reinicia la partida. No necesitas actualizar una copia local, exportar en Godot ni abrir Xcode para estas pruebas.
+
+La versión Web usa Compatibility y permite probar los modelos, las oleadas y los gestos. La aplicación iOS conserva su renderizador Mobile y necesita pruebas propias de rendimiento, sonido e interacción en el teléfono. Consulta [la automatización y sus límites](docs/web-preview.md).
 
 ## Jugar en una Mac con Apple Silicon
 

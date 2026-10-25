@@ -2,6 +2,16 @@
 
 Motor de referencia cloud: **Godot 4.6.3.stable.official.7d41c59c4**. Los comandos se ejecutan desde la raíz del proyecto. La prueba física reportada utiliza otra versión del editor y se registra por separado.
 
+## Exportación y automatización Web — 25 de octubre de 2026
+
+`bash scripts/run_tests.sh --gameplay` terminó con código 0, sin errores ni advertencias: **343 comprobaciones y tres simulaciones aprobadas**. La estrategia de cinco oleadas terminó en victoria y la estrategia sin fugas conservó las 20 vidas.
+
+`bash scripts/export_web.sh` importó y exportó correctamente una copia temporal con Compatibility y la plantilla oficial sin hilos de Godot 4.6.3. Los hashes de `project.godot` y `export_presets.cfg` del checkout original permanecieron iguales. Se verificaron los hashes oficiales del editor y la plantilla, la reutilización de caché del instalador y el rechazo de errores de Godot incluso cuando su código de salida es cero.
+
+El paquete Web contiene mapa, balance y oleadas JSON y los modelos texturizados; excluye tests, documentación y herramientas. Se sirvió por HTTP local sin cabeceras COOP/COEP y cargó en **Chromium / WebGL 2 con SwiftShader, viewport táctil de 390 × 844**. Se ejercitaron selección, compra (300 a 200 monedas), inicio de oleada, enemigos y recompensas, pausa con imagen estable, sonido desactivado, continuación, reinicio (300 monedas, 20 vidas, 0 oleadas) y giro con dos dedos mediante eventos CDP. No hubo errores de página, de consola ni solicitudes fallidas. Se corrigieron símbolos del HUD que dependían de fuentes ausentes en Web.
+
+Esta revisión no acredita Safari real ni rendimiento de iPhone. La exportación local aprobada tampoco acredita un despliegue: la creación de Pages mediante la API devolvió `403 Resource not accessible by integration`. La activación inicial y la comprobación del commit publicado se describen en [web-preview.md](web-preview.md).
+
 ## Giro táctil de la cámara — 25 de octubre de 2026
 
 `bash scripts/run_tests.sh` terminó con código 0, sin errores ni advertencias: **343 comprobaciones**, repartidas en 143 de lógica, 68 de entrada, 70 de presentación y 62 de modelos. No cambiaron el combate ni el balance; las tres partidas automatizadas de la integración de modelos siguen registradas en el apartado siguiente y no se repitieron para este cambio de cámara.

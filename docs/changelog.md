@@ -1,5 +1,11 @@
 # Cambios de Fort Control
 
+## Publicación automática de pruebas Web
+
+Cada cambio de `main` activa un workflow que ejecuta las comprobaciones del juego y tres simulaciones de combate, exporta una copia para Web y la publica en GitHub Pages. La activación de Pages en GitHub es un paso inicial; los detalles están en [web-preview.md](web-preview.md).
+
+La exportación usa Compatibility y una plantilla sin hilos, con recursos versionados y sin caché PWA. Conserva los ajustes nativos de Godot y la firma iOS. Se sustituyen símbolos del HUD que dependían de fuentes del sistema para que los botones y estadísticas se lean también en el navegador.
+
 ## Giro de cámara con dos dedos
 
 Deslizar dos dedos juntos hacia los lados gira la vista alrededor del tablero, manteniendo su inclinación. Un dedo desplaza la cámara y el pellizco sigue controlando el zoom. En escritorio, el giro también está disponible al arrastrar con el botón derecho del mouse.

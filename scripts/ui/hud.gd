@@ -98,7 +98,7 @@ func _build_ui() -> void:
 	var title := _label("FORT CONTROL", 28, CREAM)
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	brand_row.add_child(title)
-	_pause_button = _button("Ⅱ", BLUE)
+	_pause_button = _button("II", BLUE)
 	_pause_button.name = "PauseButton"
 	_pause_button.custom_minimum_size = Vector2(90, 90)
 	_pause_button.tooltip_text = "Pausar (P / Esc)"
@@ -158,7 +158,7 @@ func _build_ui() -> void:
 	_context_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	context_content.add_child(_context_hint)
 
-	_wave_button = _button("INICIAR OLEADA 1  →", GOLD)
+	_wave_button = _button("INICIAR OLEADA 1", GOLD)
 	_wave_button.name = "StartWaveButton"
 	_wave_button.custom_minimum_size.y = 94
 	_wave_button.pressed.connect(func() -> void: start_wave_requested.emit())
@@ -190,7 +190,7 @@ func _build_ui() -> void:
 	var result_box := VBoxContainer.new()
 	result_box.add_theme_constant_override("separation", 18)
 	result_panel.add_child(result_box)
-	var sigil := _label("◆  FORT CONTROL  ◆", 20, GOLD)
+	var sigil := _label("·  FORT CONTROL  ·", 20, GOLD)
 	sigil.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	result_box.add_child(sigil)
 	_overlay_title = _label("PAUSA", 40, CREAM)
@@ -229,7 +229,7 @@ func update_status(gold: int, health: int, wave: int, total: int, can_start: boo
 	_wave_value.text = "%d / %d" % [wave, total]
 	_wave_button.disabled = not can_start or _paused or _result_shown
 	if can_start:
-		_wave_button.text = "INICIAR OLEADA %d  →" % (wave + 1)
+		_wave_button.text = "INICIAR OLEADA %d" % (wave + 1)
 	elif wave >= total:
 		_wave_button.text = "ÚLTIMA DEFENSA · ELIMINA A LOS RESTANTES"
 	else:
@@ -263,7 +263,7 @@ func _refresh_context() -> void:
 		else:
 			var next_stats: Dictionary = _tower_levels[level]
 			var next_cost := int(next_stats.cost)
-			_context_details.text = "Daño %d → %d   ·   Alcance %.1f → %.1f\nAtaques/s %.2f → %.2f" % [
+			_context_details.text = "Daño %d a %d   ·   Alcance %.1f a %.1f\nAtaques/s %.2f a %.2f" % [
 				int(stats.damage), int(next_stats.damage), float(stats.range), float(next_stats.range),
 				1.0 / float(stats.interval), 1.0 / float(next_stats.interval)
 			]
