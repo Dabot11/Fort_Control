@@ -1,0 +1,27 @@
+; Fort Control — Godot 4. Use Compatibility only as an optional runtime override.
+config_version=5
+
+[application]
+config/name="Fort Control"
+run/main_scene="res://scenes/main/main.tscn"
+config/features=PackedStringArray("4.6", "Mobile")
+config/icon="res://assets/icon.svg"
+
+[display]
+window/size/viewport_width=720
+window/size/viewport_height=1280
+window/size/window_width_override=540
+window/size/window_height_override=960
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+window/handheld/orientation=1
+
+[rendering]
+renderer/rendering_method="mobile"
+renderer/rendering_method.mobile="mobile"
+textures/default_filters/use_nearest_mipmap_filter=false
+environment/defaults/default_clear_color=Color(0.10, 0.18, 0.22, 1)
+
+[input_devices]
+pointing/emulate_touch_from_mouse=false
+pointing/emulate_mouse_from_touch=true

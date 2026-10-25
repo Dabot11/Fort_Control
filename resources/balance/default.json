@@ -1,0 +1,12 @@
+{
+  "initial_gold": 300,
+  "castle_health": 20,
+  "enemy_reward": 25,
+  "castle_damage": 1,
+  "projectile_speed": 15.0,
+  "tower_levels": [
+    {"cost": 100, "damage": 18.0, "range": 3.7, "interval": 0.95},
+    {"cost": 125, "damage": 34.0, "range": 4.3, "interval": 0.75},
+    {"cost": 200, "damage": 58.0, "range": 4.9, "interval": 0.58}
+  ]
+}
